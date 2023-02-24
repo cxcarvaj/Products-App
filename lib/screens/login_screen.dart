@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'package:products_app/ui/input_decorations.dart';
 import 'package:products_app/widgets/widgets.dart';
+import '../providers/login_form_provider.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -25,7 +28,10 @@ class LoginScreen extends StatelessWidget {
                     const SizedBox(
                       height: 30,
                     ),
-                    _LoginForm(),
+                    ChangeNotifierProvider(
+                      create: (BuildContext context) => LoginFormProvider(),
+                      child: const _LoginForm(),
+                    ),
                   ],
                 ),
               ),
@@ -51,69 +57,84 @@ class _LoginForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Form(
-        // TODO: mantain state reference of the form using the key.
-        autovalidateMode: AutovalidateMode.onUserInteraction,
-        child: Column(
-          children: [
-            TextFormField(
-              autocorrect: false,
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecorations.authInputDecoration(
-                hintText: 'user.name@gmail.com',
-                labelText: 'Email',
-                prefixIcon: Icons.alternate_email,
-              ),
-              validator: (value) {
-                String pattern =
-                    r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+    final loginForm = Provider.of<LoginFormProvider>(context);
 
-                RegExp regExp = RegExp(pattern);
+    return Form(
+      //* maintain state reference of the form using the key.
+      key: loginForm.formKey,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      child: Column(
+        children: [
+          TextFormField(
+            autocorrect: false,
+            keyboardType: TextInputType.emailAddress,
+            decoration: InputDecorations.authInputDecoration(
+              hintText: 'user.name@gmail.com',
+              labelText: 'Email',
+              prefixIcon: Icons.alternate_email,
+            ),
+            onChanged: (value) => loginForm.email = value,
+            validator: (value) {
+              String pattern =
+                  r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
 
-                return regExp.hasMatch(value ?? '')
-                    ? null
-                    : 'Please enter a valid email';
-              },
+              RegExp regExp = RegExp(pattern);
+
+              return regExp.hasMatch(value ?? '')
+                  ? null
+                  : 'Please enter a valid email';
+            },
+          ),
+          const SizedBox(height: 30),
+          TextFormField(
+            autocorrect: false,
+            obscureText: true,
+            keyboardType: TextInputType.emailAddress,
+            decoration: InputDecorations.authInputDecoration(
+              hintText: '******',
+              labelText: 'Password',
+              prefixIcon: Icons.lock_outline,
             ),
-            const SizedBox(height: 30),
-            TextFormField(
-              autocorrect: false,
-              obscureText: true,
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecorations.authInputDecoration(
-                hintText: '******',
-                labelText: 'Password',
-                prefixIcon: Icons.lock_outline,
-              ),
-              validator: (value) {
-                return (value != null && value.length >= 6)
-                    ? null
-                    : 'Password must be at least 6 characters';
-              },
+            onChanged: (value) => loginForm.password = value,
+            validator: (value) {
+              return (value != null && value.length >= 6)
+                  ? null
+                  : 'Password must be at least 6 characters';
+            },
+          ),
+          const SizedBox(height: 30),
+          MaterialButton(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
             ),
-            const SizedBox(height: 30),
-            MaterialButton(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+            disabledColor: Colors.grey,
+            elevation: 0,
+            color: Colors.deepPurple,
+            onPressed: loginForm.isLoading
+                ? null
+                : () async {
+                    FocusScope.of(context).unfocus();
+                    if (!loginForm.isValidForm()) return;
+                    loginForm.isLoading = true;
+                    await Future.delayed(const Duration(seconds: 2));
+
+                    // TODO: validate if login is valid
+
+                    loginForm.isLoading = true;
+
+                    if (context.mounted) {
+                      Navigator.pushReplacementNamed(context, '/home');
+                    }
+                  },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 15),
+              child: Text(
+                loginForm.isLoading ? 'Loading...' : 'Login',
+                style: const TextStyle(color: Colors.white, fontSize: 17),
               ),
-              disabledColor: Colors.grey,
-              elevation: 0,
-              color: Colors.deepPurple,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 80, vertical: 15),
-                child: const Text(
-                  'Login',
-                  style: TextStyle(color: Colors.white, fontSize: 17),
-                ),
-              ),
-              onPressed: () {
-                // TODO: login form
-              },
-            )
-          ],
-        ),
+            ),
+          )
+        ],
       ),
     );
   }
