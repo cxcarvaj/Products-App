@@ -1,21 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:products_app/screens/screens.dart';
+import 'package:provider/provider.dart';
+
 import 'package:products_app/widgets/widgets.dart';
+import '../services/services.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
+    final productService = Provider.of<ProductService>(context);
+
+    if (productService.isLoading) {
+      return const LoadingScreen();
+    }
+
+    final products = productService.products;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Products'),
       ),
       // * ListView builder is a widget that builds a list of items on demand.
       body: ListView.builder(
-        itemCount: 10,
+        itemCount: products.length,
         itemBuilder: (BuildContext context, int index) {
           return GestureDetector(
             onTap: () => Navigator.pushNamed(context, '/product'),
-            child: const ProductCard(),
+            child: ProductCard(product: products[index]),
           );
         },
       ),
