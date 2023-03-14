@@ -128,7 +128,7 @@ class _LoginForm extends StatelessWidget {
             onPressed: loginForm.isLoading
                 ? null
                 : () async {
-                    // This will close the keyboard
+                    //* This will close the keyboard
                     FocusScope.of(context).unfocus();
 
                     final authService =
@@ -144,7 +144,7 @@ class _LoginForm extends StatelessWidget {
                     );
                     if (errorMessage == null) {
                       Future.microtask(() {
-                        Navigator.pushReplacementNamed(context, 'home');
+                        Navigator.pushReplacementNamed(context, '/home');
                       });
                     } else {
                       print(errorMessage);
