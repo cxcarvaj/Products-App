@@ -11,6 +11,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final productService = Provider.of<ProductService>(context);
+    final authService = Provider.of<AuthService>(context, listen: false);
 
     if (productService.isLoading) {
       return const LoadingScreen();
@@ -21,6 +22,15 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Products'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              authService.logout();
+              Navigator.pushReplacementNamed(context, '/login');
+            },
+          ),
+        ],
       ),
       // * ListView builder is a widget that builds a list of items on demand.
       body: ListView.builder(
