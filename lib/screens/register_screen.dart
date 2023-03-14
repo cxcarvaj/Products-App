@@ -142,8 +142,10 @@ class _LoginForm extends StatelessWidget {
                       loginForm.email,
                       loginForm.password,
                     );
-                    if (errorMessage == null && context.mounted) {
-                      Navigator.pushReplacementNamed(context, '/home');
+                    if (errorMessage == null) {
+                      Future.microtask(() {
+                        Navigator.pushReplacementNamed(context, 'home');
+                      });
                     } else {
                       print(errorMessage);
                       loginForm.isLoading = true;
