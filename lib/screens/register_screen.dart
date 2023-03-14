@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:products_app/ui/input_decorations.dart';
 import 'package:products_app/widgets/widgets.dart';
 import '../providers/login_form_provider.dart';
+import '../services/services.dart';
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -127,17 +128,25 @@ class _LoginForm extends StatelessWidget {
             onPressed: loginForm.isLoading
                 ? null
                 : () async {
+                    // This will close the keyboard
                     FocusScope.of(context).unfocus();
+
+                    final authService =
+                        Provider.of<AuthService>(context, listen: false);
+
                     if (!loginForm.isValidForm()) return;
                     loginForm.isLoading = true;
-                    await Future.delayed(const Duration(seconds: 2));
 
                     // TODO: validate if login is valid
-
-                    loginForm.isLoading = true;
-
-                    if (context.mounted) {
+                    final String? errorMessage = await authService.createUser(
+                      loginForm.email,
+                      loginForm.password,
+                    );
+                    if (errorMessage == null && context.mounted) {
                       Navigator.pushReplacementNamed(context, '/home');
+                    } else {
+                      print(errorMessage);
+                      loginForm.isLoading = true;
                     }
                   },
             child: Container(
